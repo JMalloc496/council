@@ -1,0 +1,97 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Notifications\Notifiable;
+use Emberfuse\Scorch\Models\Traits\HasApiTokens;
+use Emberfuse\Scorch\Models\Traits\HasProfilePhoto;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Foundation\Auth\User as Authenticatable;
+use Emberfuse\Scorch\Models\Concerns\InteractsWithSessions;
+use Emberfuse\Scorch\Models\Traits\TwoFactorAuthenticatable;
+use Emberfuse\Scorch\Contracts\Auth\HasApiTokens as ApiTokenContract;
+
+class User extends Authenticatable implements ApiTokenContract
+{
+    use HasFactory;
+    use Notifiable;
+    use HasApiTokens;
+    use HasProfilePhoto;
+    use InteractsWithSessions;
+    use TwoFactorAuthenticatable;
+
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var array
+     */
+    protected $fillable = [
+        'name',
+        'email',
+        'phone',
+        'password',
+        'username',
+        'settings',
+        'address',
+        'locked',
+        'profile_photo_path',
+        'two_factor_secret',
+        'two_factor_recovery_codes',
+    ];
+
+    /**
+     * The attributes that should be hidden for arrays.
+     *
+     * @var array
+     */
+    protected $hidden = [
+        'password',
+        'remember_token',
+        'two_factor_recovery_codes',
+        'two_factor_secret',
+    ];
+
+    /**
+     * The attributes that should be cast to native types.
+     *
+     * @var array
+     */
+    protected $casts = [
+        'email_verified_at' => 'datetime',
+        'two_factor_enabled' => 'boolean',
+        'settings' => 'object',
+        'address' => 'object',
+    ];
+
+    /**
+     * The accessors to append to the model's array form.
+     *
+     * @var array
+     */
+    protected $appends = [
+        'profile_photo_url',
+        'sessions',
+        'two_factor_enabled',
+    ];
+
+    /**
+     * Get all threads that belong to this user.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function threads(): HasMany
+    {
+        return $this->hasMany(Thread::class);
+    }
+
+    /**
+     * Get all replies that belong to this user.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function replies(): HasMany
+    {
+        return $this->hasMany(Thread::class);
+    }
+}
